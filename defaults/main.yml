@@ -1,0 +1,4 @@
+---
+# defaults file for python3
+py3_version: 3.5.1
+py3_install_prefix: /usr/local

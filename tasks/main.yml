@@ -1,0 +1,50 @@
+---
+- name: update apt if needed
+  become: yes
+  apt: update_cache=yes cache_valid_time=36000
+
+- name: install libs for python3
+  become: yes
+  apt: name={{ item }} state=present
+  with_items:
+    - libbz2-dev
+    - libreadline-dev
+    - libssl-dev
+    - libsqlite3-dev
+    - libgdbm-dev
+    - zlib1g-dev
+    - tk-dev
+    - tcl-dev
+    - liblzma-dev
+    - libncurses5-dev
+
+- name: download python3 source
+  get_url: > 
+    url=https://www.python.org/ftp/python/{{ py3_version }}/Python-{{ py3_version }}.tgz
+    dest=/tmp/Python-{{ py3_version }}.tgz
+
+- name: uncompress python3 source
+  unarchive: >
+    src=/tmp/Python-{{ py3_version }}.tgz
+    dest=/tmp
+    creates=/tmp/Python-{{ py3_version }}
+    copy=no
+
+- name: configure
+  command: >
+    ./configure --prefix={{ py3_install_prefix }}
+    chdir=/tmp/Python-{{ py3_version }}
+    creates=/tmp/Python-{{ py3_version }}/Makefile
+
+- name: make
+  command: >
+    make
+    chdir=/tmp/Python-{{ py3_version }}
+    creates=/tmp/Python-{{ py3_version }}/python
+
+- name: make install
+  become: yes
+  command: >
+    make install
+    chdir=/tmp/Python-{{ py3_version }}
+    creates=/usr/local/bin/python3
